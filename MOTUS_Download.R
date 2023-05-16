@@ -301,7 +301,7 @@ ggplot(BBBA_locs, aes(x = x.est, y = y.est))+
   geom_segment(aes(x = x.est, y = y.est, xend = next_loc_x, yend = next_loc_y), arrow = arrow(length = unit(.15, "cm"), type = "closed"), linewidth = .1, col = "grey50")+
   geom_jitter()+
   geom_line(linewidth = .1)+
-  geom_point(data = nodesdata, aes(x = UTMW, y = UTMN), col = "blue")+
+  geom_point(data = nodesdata, aes(x = UTMW, y = UTMN), col = "blue", pch = 5)+
   geom_point(data = mostrecent, aes(x = x.est, y = y.est), col = "green", pch = 4)+
   facet_wrap(~Year)+
   theme_classic()+
