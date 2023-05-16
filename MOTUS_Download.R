@@ -250,6 +250,7 @@ trilateration <- function(x) {
     
     # Populate dataframe with results
     estimated.location_results <- rbind(estimated.location_results, estimated.loc)
+    estimated.location_results <- estimated.location_results[order(estimated.location_results$day),]
     
   }
   return(estimated.location_results)
@@ -257,7 +258,7 @@ trilateration <- function(x) {
 
 BBBA_locs <- trilateration(BBBA)
 BBBA_locs$Year <- format(as.Date(BBBA_locs$day), "%Y")
-BBBA_locs$x.ci.lower_adj <- ifelse(BBBA_locs$x.ci.lower < 274000, 274000, BBBA_locs$x.ci.lower)
+BBBA_locs$x.ci.lower_adj <- ifelse(BBBA_locs$x.ci.lower < 274000, 274000, BBBA_locs$x.ci.lower) ## this is just for graphing
 BBBA_locs$y.ci.lower_adj <- ifelse(BBBA_locs$y.ci.lower < 3880700, 3880700, BBBA_locs$y.ci.lower)
 BBBA_locs$x.ci.upper_adj <- ifelse(BBBA_locs$x.ci.upper > 275000, 275000, BBBA_locs$x.ci.upper)
 BBBA_locs$y.ci.upper_adj <- ifelse(BBBA_locs$y.ci.upper > 3881100, 3881100, BBBA_locs$y.ci.upper)
@@ -281,17 +282,27 @@ ggplot(BBBA_locs, aes(x = x.est, y = y.est))+
   ylab("UTM N")
 
 ### making fancy paths
-for(i in 1:(nrow(BBBA_locs)-1)){
+for(i in 1:nrow(BBBA_locs)){
+  if(i == nrow(BBBA_locs)){
+    BBBA_locs$next_loc_x[i] <- BBBA_locs$x.est[i]
+    BBBA_locs$next_loc_y[i] <- BBBA_locs$y.est[i]
+    next
+  }
 BBBA_locs$next_loc_x[i] <- BBBA_locs$x.est[i+1]
 BBBA_locs$next_loc_y[i] <- BBBA_locs$y.est[i+1]
+
 }
+
+mostrecent <- BBBA_locs[nrow(BBBA_locs),]
+
 
 ggplot(BBBA_locs, aes(x = x.est, y = y.est))+
   geom_point()+
-  geom_segment(aes(xend = next_loc_x, yend = next_loc_y), arrow = arrow(length = unit(.14, "cm"), type = "closed"), linewidth = .2, col = "grey50")+
+  geom_segment(aes(x = x.est, y = y.est, xend = next_loc_x, yend = next_loc_y), arrow = arrow(length = unit(.15, "cm"), type = "closed"), linewidth = .1, col = "grey50")+
   geom_jitter()+
-  #geom_line(linewidth = .1)+
+  geom_line(linewidth = .1)+
   geom_point(data = nodesdata, aes(x = UTMW, y = UTMN), col = "blue")+
+  geom_point(data = mostrecent, aes(x = x.est, y = y.est), col = "green", pch = 4)+
   facet_wrap(~Year)+
   theme_classic()+
   ggtitle("BuBuBuA VEER F")+
